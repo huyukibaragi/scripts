@@ -3,16 +3,18 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/sclevine/agouti"
 )
 
 func main() {
-	bento := bentoSelect()
-	countBento := "#productsForm_" + bento + " > div.push > input"
+	bento := bentoSelect() // 弁当を選んでもらい弁当IDを取得する
+	orderTime := orderTime()
+	countBento := "#productsForm_" + bento + " > div.push > input" // あとで使う弁当セレクト用のcssセレクタの値をここで設定する
 	orderBento := "#productsForm_" + bento + " > div.btn_cartin"
-	driver := agouti.ChromeDriver(
+	driver := agouti.ChromeDriver( // ChromeDriverをheadlessで設定。
 		agouti.ChromeOptions("args", []string{
 			"--headless",             // headlessモードの指定
 			"--window-size=1280,800", // ウィンドウサイズの指定
@@ -28,8 +30,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	page.Navigate("https://nettomotto.jp/?sitetype=d")
-	page.FindByName("id").Fill("")
+	page.Navigate("https://nettomotto.jp/?sitetype=d") // ネット注文の画面を立ち上げ
+	page.FindByName("id").Fill("")                     // loginする用の個人情報
 	page.FindByName("password").Fill("")
 	// formをサブミット
 	if err := page.FindByClass("login_btn").Submit(); err != nil {
@@ -37,6 +39,9 @@ func main() {
 	}
 	page.Find("body > main > section.service_block > div.service_box01 > div.service_takeout > p > a > img").Click()
 	page.Find("#form5 > input").Click()
+	time.Sleep(1 * time.Second) // 1秒待つ
+	page.FindByName("target_hour").Fill(orderTime[0])
+	page.FindByName("target_minutes").Fill(orderTime[1])
 	time.Sleep(1 * time.Second) // 1秒待つ
 	page.Find("#row_1520 > td:nth-child(15) > input[type=\"image\"]").Click()
 	time.Sleep(1 * time.Second) // 1秒待つ
@@ -79,6 +84,16 @@ func bentoSelect() string {
 	case "3":
 		bento = "2644"
 	}
-	fmt.Println("右記のお弁当を注文いたします: ", bento, "\n")
 	return bento
+}
+
+func orderTime() []string {
+	fmt.Println("注文したい時間を『10:20』の形式で入力ください。現在時間の30分後からのご予約が可能となります。")
+	var orderTime string
+	_, err := fmt.Scanln(&orderTime)
+	if err != nil {
+		log.Fatal(err)
+	}
+	orderTimeAr := strings.Split(orderTime, ":")
+	return orderTimeAr
 }
