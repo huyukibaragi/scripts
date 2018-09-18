@@ -57,8 +57,8 @@ func main() {
 	page.FindByName("card_expire_year").Fill("")
 	page.FindByName("card_securitycode").Fill("")
 	page.FindByName("btn_next").Click()
-	//time.Sleep(4 * time.Second)   // 4秒待つ
-	//page.Screenshot("Screen.png") // スクリーンショット
+	time.Sleep(4 * time.Second)   // 4秒待つ
+	page.Screenshot("Screen.png") // スクリーンショット
 }
 
 func bentoSelect() string {
@@ -93,6 +93,15 @@ func orderTime() []string {
 	_, err := fmt.Scanln(&orderTime)
 	if err != nil {
 		log.Fatal(err)
+	}
+	t := time.Now()
+	limitTime := t.Add(6 * time.Hour)
+	t.Add(-6 * time.Hour)
+	nearTime := t.Add(30 * time.Minute)
+	const layout = "15:04"
+	orderTimeParse, _ := time.Parse(layout, orderTime)
+	if limitTime.Format(layout) < orderTimeParse.Format(layout) || orderTimeParse.Format(layout) < nearTime.Format(layout) {
+		log.Fatal("注文時点から6時間以内の受取日時を指定ください。")
 	}
 	orderTimeAr := strings.Split(orderTime, ":")
 	return orderTimeAr
