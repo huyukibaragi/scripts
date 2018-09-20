@@ -1,0 +1,11 @@
+source 'https://rubygems.org/'
+ruby '2.5.1'
+
+# 共通Gem
+gem 'rake'
+gem 'activerecord'
+gem 'activerecord-import'
+gem 'nokogiri'
+gem 'open_uri_redirections'
+gem 'sendgrid-ruby'
+gem 'rubocop'
